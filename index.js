@@ -32,24 +32,25 @@ var listener = app.listen(process.env.PORT || 3000, function () {
 });
 
 app.get("/api/:date?", (req, res) => {
-  const dateParam = req.params.date;
+  let dateString = req.params.date;
+
   let date;
 
-  // Jika tidak ada parameter, pakai tanggal saat ini
-  if (!dateParam) {
+  // Jika parameter tidak ada (kondisi nomor 7 & 8)
+  if (!dateString) {
     date = new Date();
-  } 
-  // Jika semua karakter angka (Unix timestamp dalam milidetik atau detik)
-  else if (/^\d+$/.test(dateParam)) {
-    // Jika panjang angka hanya 10 digit, berarti detik, ubah ke milidetik
-    date = new Date(dateParam.length === 10 ? parseInt(dateParam) * 1000 : parseInt(dateParam));
-  } 
-  // Jika string tanggal (misalnya "2015-12-25")
-  else {
-    date = new Date(dateParam);
+  } else {
+    // Jika isinya angka (mungkin unix timestamp)
+    if (/^\d+$/.test(dateString)) {
+      // Konversi ke number lalu buat Date dari milidetik
+      date = new Date(parseInt(dateString));
+    } else {
+      // Coba parsing sebagai string tanggal biasa
+      date = new Date(dateString);
+    }
   }
 
-  // Cek validitas tanggal
+  // Cek validitas
   if (date.toString() === "Invalid Date") {
     return res.json({ error: "Invalid Date" });
   }
