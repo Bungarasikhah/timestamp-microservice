@@ -1,62 +1,42 @@
-// index.js
-// where your node app starts
+const express = require('express');
+const cors = require('cors');
 
-// init project
-var express = require('express');
-var app = express();
+const app = express();
+app.use(cors());
 
-// enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-// so that your API is remotely testable by FCC 
-var cors = require('cors');
-app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 204
-
-// http://expressjs.com/en/starter/static-files.html
-app.use(express.static('public'));
-
-// http://expressjs.com/en/starter/basic-routing.html
-app.get("/", function (req, res) {
-  res.sendFile(__dirname + '/views/index.html');
+app.get('/', (req, res) => {
+  res.send('Timestamp Microservice');
 });
 
-
-// your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
-});
-
-
-
-// Listen on port set in environment variable or default to 3000
-var listener = app.listen(process.env.PORT || 3000, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
-});
-
-app.get("/api/:date?", (req, res) => {
-  let dateString = req.params.date;
+app.get('/api/:date?', (req, res) => {
+  const dateString = req.params.date;
 
   let date;
 
-  // Jika parameter tidak ada (kondisi nomor 7 & 8)
+  // If no date provided, use current date
   if (!dateString) {
     date = new Date();
   } else {
-    // Jika isinya angka (mungkin unix timestamp)
+    // Check if it's a timestamp (only digits)
     if (/^\d+$/.test(dateString)) {
-      // Konversi ke number lalu buat Date dari milidetik
       date = new Date(parseInt(dateString));
     } else {
-      // Coba parsing sebagai string tanggal biasa
       date = new Date(dateString);
     }
   }
 
-  // Cek validitas
-  if (date.toString() === "Invalid Date") {
-    return res.json({ error: "Invalid Date" });
+  // Check for invalid date
+  if (date.toString() === 'Invalid Date') {
+    return res.json({ error: 'Invalid Date' });
   }
 
-  res.json({
+  return res.json({
     unix: date.getTime(),
     utc: date.toUTCString()
   });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
